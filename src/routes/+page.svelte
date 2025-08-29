@@ -1,35 +1,18 @@
 <script lang="ts">
     import { Trash2, Check } from "@lucide/svelte";
+    let { data, form } = $props();
 
     interface Task {
         id: number,
-        description: string,
-        done: boolean,
+        description: string | null,
+        isDone: boolean,
+        createAt?: Date,
+        updateAt?: Date
+        
     }
 
-    let tasks: Task[] = $state([]);
-    let description: string = $state("");
-    let isDone: boolean = $state(false);
+    let tasks: Task[] = $state(data.tasks);
 
-    function addTask() {
-        if (description.trim() === "") {
-            return;
-        }
-
-        let newTask: Task = {
-            id: Date.now() + Math.floor(Math.random() * 10000),
-            description: description,
-            done: isDone
-        }
-
-        tasks = [...tasks, newTask];
-
-        description = ""
-    }
-
-    function delateTask(id: number) {
-        tasks = tasks.filter((task) => task.id !== id);
-    }
 </script>
 
 
@@ -41,6 +24,12 @@
             <h1 class=" text-4xl text-center md:text-start font-bold text-gray-700 mb-6">
                 Votre liste de taches
             </h1>
+
+            <!-- afficher les message d'erreur ici -->
+             {#if form?.error}
+                <p class=" text-2xl font-bold text-red-600 text-center">{form.message}</p>
+             {/if}
+
             <ul class="space-y-4 pb-36">
                 {#if tasks.length === 0}
                     <h3 class=" text-2xl font-light text-center mt-16 text-gray-600">
@@ -55,28 +44,27 @@
                             <div class="flex items-center gap-3">
                                 <input 
                                     type="checkbox" 
-                                    bind:checked={task.done}
+                                    bind:checked={task.isDone}
                                     id="complete{task.id}" 
                                     name="complete" 
                                     class="w-5 h-5 text-blue-500 border-gray-300 rounded"
                                 >
-                                <p class="text-gray-600 font-semibold {task.done ? ' line-through' : ''} ">
+                                <p class="text-gray-600 font-semibold {task.isDone ? ' line-through' : ''} ">
                                     { task.description }
                                 </p>
 
-                                {#if task.done}
+                                {#if task.isDone}
                                     <span class=" text-green-600 font-black">
                                         <Check  />
                                     </span>
                                 {/if}
                             </div>
-                            <form onsubmit={(e) => e.preventDefault()}>
+                            <!-- svelte-ignore component_name_lowercase -->
+                            <form method="GET" action="?/delete">
                                 <input type="hidden" name="taskId" value={task.id}>
                                 <button 
                                     class="text-red-400 hover:text-red-600 cursor-pointer"
                                     aria-label="Supprimer la tâche"
-
-                                    onclick={() => delateTask(task.id)}
                                 >
                                     <Trash2 />
                                 </button>
@@ -90,10 +78,8 @@
 
 
     <div class="container mx-auto py-6 px-5 bg-white fixed w-full bottom-0 left-1/2 -translate-x-1/2">
-        <form 
-            method="post"
-            onsubmit={(e) => e.preventDefault()}
-        >
+        <!-- svelte-ignore component_name_lowercase -->
+        <form method="post" action="?/addTask">
             <div class="flex flex-col md:flex-row md:items-center md:justify-center gap-5">
                 <label 
                     for="todo"
@@ -105,16 +91,15 @@
                     type="text" 
                     name="todo" 
                     id="todo"
-                    placeholder="Qu'avez vous prevu de faire ?"
-                    bind:value={description}
                     required
+                    placeholder="Qu'avez vous prevu de faire ?"
                     class=" text-lg font-normal md:w-2xl max-w-full py-2 px-3 border rounded focus:outline-2 
                     focus:outline-blue-500"
                 >
                 <button 
+                    type="submit"
                     class=" py-2.5 px-5 bg-blue-500 rounded text-white font-semibold cursor-pointer 
                     border-2 border-blue-500 hover:bg-transparent hover:text-blue-500 transition-colors"
-                    onclick={addTask}
                 >
                     Ajouter la tache
                 </button>
