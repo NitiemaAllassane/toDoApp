@@ -1,8 +1,0 @@
--- CreateTable
-CREATE TABLE "Task" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "description" TEXT,
-    "isDone" BOOLEAN NOT NULL DEFAULT false,
-    "createAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updateAt" DATETIME NOT NULL
-);
